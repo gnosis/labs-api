@@ -1,7 +1,6 @@
 name: Python CD
 
 on:
-  pull_request:  # TODO: Remove before merge to main.
   push:
     branches: [main]
   workflow_dispatch:
