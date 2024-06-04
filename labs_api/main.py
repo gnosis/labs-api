@@ -2,8 +2,11 @@ import fastapi
 import uvicorn
 from config import Config
 from fastapi.middleware.cors import CORSMiddleware
+from prediction_market_agent_tooling.gtypes import HexAddress
 
 from labs_api.config import Config
+from labs_api.insights import MarketInsightsResponse, market_insights_cached
+from labs_api.insights_cache import MarketInsightsResponseCache
 
 
 def create_app() -> fastapi.FastAPI:
@@ -15,6 +18,7 @@ def create_app() -> fastapi.FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    market_insights_cache = MarketInsightsResponseCache()
 
     @app.get("/ping/")
     def _ping() -> str:
@@ -22,9 +26,9 @@ def create_app() -> fastapi.FastAPI:
         return "pong"
 
     @app.get("/market-insights")
-    def _market_insights(market_id: str) -> str:
-        """Returns markdown formatted market insights for a given market on Omen."""
-        return f"hello {market_id}"
+    def _market_insights(market_id: HexAddress) -> MarketInsightsResponse:
+        """Returns market insights for a given market on Omen."""
+        return market_insights_cached(market_id, market_insights_cache)
 
     return app
 
@@ -37,6 +41,6 @@ if __name__ == "__main__":
         host=config.HOST,
         port=config.PORT,
         workers=config.WORKERS,
-        reload=False,
+        reload=True,
         log_level="info",
     )
