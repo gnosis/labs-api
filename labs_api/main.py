@@ -47,6 +47,6 @@ if __name__ == "__main__":
         host=config.HOST,
         port=config.PORT,
         workers=config.WORKERS,
-        reload=True,
+        reload=config.RELOAD,
         log_level="info",
     )

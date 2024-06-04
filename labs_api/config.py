@@ -13,6 +13,7 @@ class Config(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8080
     WORKERS: int = 1
+    RELOAD: bool = True
     TAVILY_API_KEY: t.Optional[SecretStr] = None
     SQLALCHEMY_DB_URL: t.Optional[SecretStr] = None
 
