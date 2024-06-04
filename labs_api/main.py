@@ -3,6 +3,7 @@ import uvicorn
 from config import Config
 from fastapi.middleware.cors import CORSMiddleware
 from prediction_market_agent_tooling.gtypes import HexAddress
+from prediction_market_agent_tooling.loggers import logger
 
 from labs_api.config import Config
 from labs_api.insights import MarketInsightsResponse, market_insights_cached
@@ -23,12 +24,17 @@ def create_app() -> fastapi.FastAPI:
     @app.get("/ping/")
     def _ping() -> str:
         """Ping Pong!"""
+        logger.info("Pong!")
         return "pong"
 
-    @app.get("/market-insights")
+    @app.get("/market-insights/")
     def _market_insights(market_id: HexAddress) -> MarketInsightsResponse:
         """Returns market insights for a given market on Omen."""
-        return market_insights_cached(market_id, market_insights_cache)
+        insights = market_insights_cached(market_id, market_insights_cache)
+        logger.info(f"Insights for `{market_id}`: {insights.model_dump()}")
+        return insights
+
+    logger.info("API created.")
 
     return app
 
