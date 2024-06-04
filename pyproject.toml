@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "~3.10.0"
-prediction-market-agent-tooling = { git = "https://github.com/gnosis/prediction-market-agent-tooling.git", branch = "peter/typer" }
+prediction-market-agent-tooling = { git = "https://github.com/gnosis/prediction-market-agent-tooling.git", branch = "peter/typer" } # TODO: Change to release version
 pydantic-settings = "^2.1.0"
 tavily-python = "^0.3.1"
 fastapi = "^0.111.0"
