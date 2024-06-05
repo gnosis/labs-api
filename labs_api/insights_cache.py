@@ -66,7 +66,7 @@ class MarketInsightsResponseCache:
         with Session(self.engine) as session:
             cached = MarketInsightsResponseCacheModel(
                 market_id=market_insights.market_id,
-                datetime_=utcnow(),
+                datetime_=market_insights.created_at,
                 json_dump=market_insights.model_dump_json(),
             )
             session.add(cached)
