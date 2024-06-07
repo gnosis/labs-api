@@ -1,0 +1,52 @@
+import fastapi
+import uvicorn
+from config import Config
+from fastapi.middleware.cors import CORSMiddleware
+from prediction_market_agent_tooling.gtypes import HexAddress
+from prediction_market_agent_tooling.loggers import logger
+
+from labs_api.config import Config
+from labs_api.insights import MarketInsightsResponse, market_insights_cached
+from labs_api.insights_cache import MarketInsightsResponseCache
+
+
+def create_app() -> fastapi.FastAPI:
+    app = fastapi.FastAPI()
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    market_insights_cache = MarketInsightsResponseCache()
+
+    @app.get("/ping/")
+    def _ping() -> str:
+        """Ping Pong!"""
+        logger.info("Pong!")
+        return "pong"
+
+    @app.get("/market-insights/")
+    def _market_insights(market_id: HexAddress) -> MarketInsightsResponse:
+        """Returns market insights for a given market on Omen."""
+        insights = market_insights_cached(market_id, market_insights_cache)
+        logger.info(f"Insights for `{market_id}`: {insights.model_dump()}")
+        return insights
+
+    logger.info("API created.")
+
+    return app
+
+
+if __name__ == "__main__":
+    config = Config()
+    uvicorn.run(
+        "labs_api.main:create_app",
+        factory=True,
+        host=config.HOST,
+        port=config.PORT,
+        workers=config.WORKERS,
+        reload=config.RELOAD,
+        log_level="error",
+    )
