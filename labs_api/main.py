@@ -1,3 +1,5 @@
+import typing as t
+
 import fastapi
 import uvicorn
 from config import Config
@@ -8,6 +10,15 @@ from prediction_market_agent_tooling.loggers import logger
 from labs_api.config import Config
 from labs_api.insights import MarketInsightsResponse, market_insights_cached
 from labs_api.insights_cache import MarketInsightsResponseCache
+
+HEX_ADDRESS_VALIDATOR = t.Annotated[
+    HexAddress,
+    fastapi.Query(
+        ...,
+        description="Hex address of the market on Omen.",
+        pattern="^0x[a-fA-F0-9]{40}$",
+    ),
+]
 
 
 def create_app() -> fastapi.FastAPI:
@@ -28,7 +39,7 @@ def create_app() -> fastapi.FastAPI:
         return "pong"
 
     @app.get("/market-insights/")
-    def _market_insights(market_id: HexAddress) -> MarketInsightsResponse:
+    def _market_insights(market_id: HEX_ADDRESS_VALIDATOR) -> MarketInsightsResponse:
         """Returns market insights for a given market on Omen."""
         insights = market_insights_cached(market_id, market_insights_cache)
         logger.info(f"Insights for `{market_id}`: {insights.model_dump()}")

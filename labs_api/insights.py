@@ -1,3 +1,5 @@
+import fastapi
+from prediction_market_agent_tooling.loggers import logger
 from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     HexAddress,
     OmenSubgraphHandler,
@@ -19,17 +21,28 @@ def market_insights_cached(
 
     else:
         new = market_insights(market_id)
-        cache.save(new)
+        if new.has_insights:
+            cache.save(new)
         return new
 
 
 def market_insights(market_id: HexAddress) -> MarketInsightsResponse:
     """Returns market insights for a given market on Omen."""
-    market = OmenSubgraphHandler().get_omen_market_by_market_id(market_id)
+    try:
+        market = OmenSubgraphHandler().get_omen_market_by_market_id(market_id)
+    except ValueError:
+        raise fastapi.HTTPException(
+            status_code=404, detail=f"Market with id `{market_id}` not found."
+        )
+    try:
+        insights = tavily_insights(market.question_title)
+    except Exception as e:
+        logger.error(f"Failed to get insights for market `{market_id}`: {e}")
+        insights = None
     return MarketInsightsResponse.from_tavily_response(
         market_id=market_id,
         created_at=utcnow(),
-        tavily_response=tavily_insights(market.question_title),
+        tavily_response=insights,
     )
 
 
