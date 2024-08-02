@@ -1,11 +1,12 @@
 import typing as t
+from contextlib import asynccontextmanager
 
 import fastapi
 import uvicorn
 from config import Config
 from fastapi.middleware.cors import CORSMiddleware
 from prediction_market_agent_tooling.gtypes import HexAddress
-from prediction_market_agent_tooling.loggers import logger
+from prediction_market_agent_tooling.loggers import logger, patch_logger
 
 from labs_api.config import Config
 from labs_api.insights import MarketInsightsResponse, market_insights_cached
@@ -22,7 +23,16 @@ HEX_ADDRESS_VALIDATOR = t.Annotated[
 
 
 def create_app() -> fastapi.FastAPI:
-    app = fastapi.FastAPI()
+    patch_logger()
+
+    @asynccontextmanager
+    async def lifespan(app: fastapi.FastAPI) -> t.AsyncIterator[None]:
+        # At start of the service.
+        yield
+        # At end of the service.
+        market_insights_cache.engine.dispose()
+
+    app = fastapi.FastAPI(lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
