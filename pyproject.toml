@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "~3.10.0"
-prediction-market-agent-tooling = { version = "^0.37.0" }
+prediction-market-agent-tooling = { version = "^0.45.0" }
 pydantic-settings = "^2.1.0"
 tavily-python = "^0.3.1"
 fastapi = "^0.111.0"

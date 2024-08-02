@@ -1,3 +1,4 @@
+import typing as t
 from datetime import datetime
 
 from prediction_market_agent_tooling.gtypes import HexAddress
@@ -16,23 +17,31 @@ class MarketInsightResult(BaseModel):
 class MarketInsightsResponse(BaseModel):
     market_id: HexAddress
     created_at: datetime
-    summary: str
+    summary: str | None
     results: list[MarketInsightResult]
+
+    @property
+    def has_insights(self) -> bool:
+        return bool(self.summary or self.results)
 
     @staticmethod
     def from_tavily_response(
         market_id: HexAddress,
         created_at: datetime,
-        tavily_response: "TavilyResponse",
+        tavily_response: t.Union["TavilyResponse", None],
     ) -> "MarketInsightsResponse":
         return MarketInsightsResponse(
             market_id=market_id,
             created_at=created_at,
-            summary=tavily_response.answer,
-            results=[
-                MarketInsightResult.from_tavily_result(result)
-                for result in tavily_response.results
-            ],
+            summary=tavily_response.answer if tavily_response else None,
+            results=(
+                [
+                    MarketInsightResult.from_tavily_result(result)
+                    for result in tavily_response.results
+                ]
+                if tavily_response
+                else []
+            ),
         )
 
 
