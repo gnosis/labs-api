@@ -1,6 +1,7 @@
 from datetime import timedelta
 from typing import Generator
 
+import psycopg
 import pytest
 from prediction_market_agent_tooling.gtypes import HexAddress, HexStr
 from prediction_market_agent_tooling.tools.utils import utcnow
@@ -8,12 +9,12 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 from labs_api.insights_cache import MarketInsightsResponse, MarketInsightsResponseCache
 
 
-@pytest.fixture(scope="session")
-def market_insights_response_cache() -> (
-    Generator[MarketInsightsResponseCache, None, None]
-):
-    """Creates a in-memory SQLite DB for testing"""
-    db_storage = MarketInsightsResponseCache(sqlalchemy_db_url="sqlite://")
+@pytest.fixture
+def market_insights_response_cache(
+    postgresql: psycopg.Connection,
+) -> Generator[MarketInsightsResponseCache, None, None]:
+    sqlalchemy_db_url = f"postgresql+psycopg2://{postgresql.info.user}:@{postgresql.info.host}:{postgresql.info.port}/{postgresql.info.dbname}"
+    db_storage = MarketInsightsResponseCache(sqlalchemy_db_url=sqlalchemy_db_url)
     yield db_storage
 
 
