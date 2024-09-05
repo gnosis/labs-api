@@ -14,14 +14,7 @@ class Config(BaseSettings):
     PORT: int = 8080
     WORKERS: int = 1
     RELOAD: bool = True
-    TAVILY_API_KEY: t.Optional[SecretStr] = None
     SQLALCHEMY_DB_URL: t.Optional[SecretStr] = None
-
-    @property
-    def tavily_api_key(self) -> SecretStr:
-        return check_not_none(
-            self.TAVILY_API_KEY, "TAVILY_API_KEY missing in the environment."
-        )
 
     @property
     def sqlalchemy_db_url(self) -> SecretStr:

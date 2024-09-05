@@ -2,6 +2,10 @@ import typing as t
 from datetime import datetime
 
 from prediction_market_agent_tooling.gtypes import HexAddress
+from prediction_market_agent_tooling.tools.tavily_storage.tavily_models import (
+    TavilyResponse,
+    TavilyResult,
+)
 from pydantic import BaseModel
 
 
@@ -10,7 +14,7 @@ class MarketInsightResult(BaseModel):
     title: str
 
     @staticmethod
-    def from_tavily_result(tavily_result: "TavilyResult") -> "MarketInsightResult":
+    def from_tavily_result(tavily_result: TavilyResult) -> "MarketInsightResult":
         return MarketInsightResult(url=tavily_result.url, title=tavily_result.title)
 
 
@@ -28,7 +32,7 @@ class MarketInsightsResponse(BaseModel):
     def from_tavily_response(
         market_id: HexAddress,
         created_at: datetime,
-        tavily_response: t.Union["TavilyResponse", None],
+        tavily_response: t.Union[TavilyResponse, None],
     ) -> "MarketInsightsResponse":
         return MarketInsightsResponse(
             market_id=market_id,
@@ -43,17 +47,3 @@ class MarketInsightsResponse(BaseModel):
                 else []
             ),
         )
-
-
-class TavilyResult(BaseModel):
-    title: str
-    url: str
-    content: str
-    score: float
-
-
-class TavilyResponse(BaseModel):
-    query: str
-    answer: str
-    results: list[TavilyResult]
-    response_time: float

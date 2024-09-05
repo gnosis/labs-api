@@ -53,11 +53,19 @@ class MarketInsightsResponseCache:
             item = session.exec(
                 query.order_by(desc(MarketInsightsResponseCacheModel.datetime_))
             ).first()
-            return (
-                MarketInsightsResponse.model_validate_json(item.json_dump)
-                if item is not None
-                else None
-            )
+            try:
+                market_insights_response = (
+                    MarketInsightsResponse.model_validate_json(item.json_dump)
+                    if item is not None
+                    else None
+                )
+            except ValueError as e:
+                logger.error(
+                    f"Error deserializing MarketInsightsResponse from cache for {market_id=} and {item=}: {e}"
+                )
+
+                market_insights_response = None
+            return market_insights_response
 
     def save(
         self,

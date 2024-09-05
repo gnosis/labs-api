@@ -4,12 +4,14 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     HexAddress,
     OmenSubgraphHandler,
 )
+from prediction_market_agent_tooling.tools.tavily_storage.tavily_storage import (
+    TavilyStorage,
+    tavily_search,
+)
 from prediction_market_agent_tooling.tools.utils import utcnow
-from tavily import TavilyClient
 
-from labs_api.config import Config
 from labs_api.insights_cache import MarketInsightsResponseCache
-from labs_api.models import MarketInsightsResponse, TavilyResponse
+from labs_api.models import MarketInsightsResponse
 
 
 def market_insights_cached(
@@ -35,28 +37,18 @@ def market_insights(market_id: HexAddress) -> MarketInsightsResponse:
             status_code=404, detail=f"Market with id `{market_id}` not found."
         )
     try:
-        insights = tavily_insights(market.question_title)
-    except Exception as e:
-        logger.error(f"Failed to get insights for market `{market_id}`: {e}")
-        insights = None
-    return MarketInsightsResponse.from_tavily_response(
-        market_id=market_id,
-        created_at=utcnow(),
-        tavily_response=insights,
-    )
-
-
-def tavily_insights(query: str) -> TavilyResponse:
-    """
-    Create a simple string with the top 5 search results from Tavily with a description.
-    """
-    tavily = TavilyClient(api_key=Config().tavily_api_key.get_secret_value())
-    response = TavilyResponse.model_validate(
-        tavily.search(
-            query=query,
+        tavily_response = tavily_search(
+            market.question_title,
             search_depth="basic",
             include_answer=True,
             max_results=5,
+            tavily_storage=TavilyStorage("market_insights"),
         )
+    except Exception as e:
+        logger.error(f"Failed to get tavily_response for market `{market_id}`: {e}")
+        tavily_response = None
+    return MarketInsightsResponse.from_tavily_response(
+        market_id=market_id,
+        created_at=utcnow(),
+        tavily_response=tavily_response,
     )
-    return response
