@@ -38,7 +38,11 @@ def market_insights(market_id: HexAddress) -> MarketInsightsResponse:
         )
     try:
         tavily_response = tavily_search(
-            market.question_title, tavily_storage=TavilyStorage("market_insights")
+            market.question_title,
+            search_depth="basic",
+            include_answer=True,
+            max_results=5,
+            tavily_storage=TavilyStorage("market_insights"),
         )
     except Exception as e:
         logger.error(f"Failed to get tavily_response for market `{market_id}`: {e}")
