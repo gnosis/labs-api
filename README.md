@@ -29,6 +29,8 @@ python labs_api/main.py
 
 ## Tests
 
+Tests are using [pytest-postgresql](https://pypi.org/project/pytest-postgresql/) for Postgres database. If you get `pg_config executable not found error` follow [this](https://bobcares.com/blog/error-pg_config-executable-not-found/) tutorial.
+
 ```bash
 pytest tests/
 ```
