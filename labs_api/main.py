@@ -4,13 +4,13 @@ from contextlib import asynccontextmanager
 import fastapi
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
+from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.gtypes import HexAddress
 from prediction_market_agent_tooling.loggers import logger
 
 from labs_api.config import Config
 from labs_api.insights import MarketInsightsResponse, market_insights_cached
 from labs_api.insights_cache import MarketInsightsResponseCache
-from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 
 HEX_ADDRESS_VALIDATOR = t.Annotated[
     HexAddress,
