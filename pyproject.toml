@@ -7,12 +7,15 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "~3.10.0"
-prediction-market-agent-tooling = { version = "^0.48.11" }
+prediction-market-agent-tooling = { version = "^0.48.11", extras = ["openai", "langchain"] }
 pydantic-settings = "^2.1.0"
 tavily-python = "^0.3.1"
 fastapi = "^0.111.0"
 sqlmodel = "^0.0.21"
 psycopg2-binary = "^2.9.9"
+langchain = "^0.2.16"
+langchain-openai = "^0.1.23"
+langchain-community = "^0.2.16"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"

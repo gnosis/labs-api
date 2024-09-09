@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 
 import fastapi
 import uvicorn
-from config import Config
 from fastapi.middleware.cors import CORSMiddleware
 from prediction_market_agent_tooling.gtypes import HexAddress
 from prediction_market_agent_tooling.loggers import logger
@@ -11,6 +10,7 @@ from prediction_market_agent_tooling.loggers import logger
 from labs_api.config import Config
 from labs_api.insights import MarketInsightsResponse, market_insights_cached
 from labs_api.insights_cache import MarketInsightsResponseCache
+from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 
 HEX_ADDRESS_VALIDATOR = t.Annotated[
     HexAddress,
@@ -29,6 +29,9 @@ def create_app() -> fastapi.FastAPI:
         yield
         # At end of the service.
         market_insights_cache.engine.dispose()
+
+    config = Config()
+    initialize_langfuse(config.default_enable_langfuse)
 
     app = fastapi.FastAPI(lifespan=lifespan)
     app.add_middleware(
