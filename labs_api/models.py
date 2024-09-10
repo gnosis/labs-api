@@ -32,12 +32,13 @@ class MarketInsightsResponse(BaseModel):
     def from_tavily_response(
         market_id: HexAddress,
         created_at: datetime,
+        summary: str | None,
         tavily_response: t.Union[TavilyResponse, None],
     ) -> "MarketInsightsResponse":
         return MarketInsightsResponse(
             market_id=market_id,
             created_at=created_at,
-            summary=tavily_response.answer if tavily_response else None,
+            summary=summary,
             results=(
                 [
                     MarketInsightResult.from_tavily_result(result)
