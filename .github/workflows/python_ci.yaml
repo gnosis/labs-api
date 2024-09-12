@@ -31,6 +31,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Extract environment variables for Docker container
+        # No variables required right now, add them here if needed.
+        run: |
+          echo "" >> .env 
       - name: Build Dockerimage
         run: make build
       - name: Run pytest in Docker
