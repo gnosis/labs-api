@@ -13,9 +13,15 @@ WORKDIR /app
 
 COPY pyproject.toml poetry.lock ./
 
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root --only main
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root
 
 FROM --platform=linux/amd64 python:3.10.14-bookworm AS runtime
+
+RUN apt-get update && apt-get install -y postgresql
+
+RUN useradd -m appuser
+
+USER appuser
 
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
@@ -24,7 +30,7 @@ WORKDIR /app
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY labs_api ./labs_api
+COPY . .
 
 ENV PYTHONPATH=/app
 
