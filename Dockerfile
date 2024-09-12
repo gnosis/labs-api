@@ -13,7 +13,7 @@ WORKDIR /app
 
 COPY pyproject.toml poetry.lock ./
 
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root --only main
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root
 
 FROM --platform=linux/amd64 python:3.10.14-bookworm AS runtime
 
@@ -24,7 +24,7 @@ WORKDIR /app
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY labs_api ./labs_api
+COPY . .
 
 ENV PYTHONPATH=/app
 
