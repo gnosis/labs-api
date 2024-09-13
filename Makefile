@@ -10,4 +10,5 @@ push:
 	docker push $(IMAGE_NAME)
 
 tests-docker: build
-	docker run --env-file .env --rm $(IMAGE_NAME) pytest tests
+	# Run as appuser because Postgres won't allow execution as root at any costs.
+	docker run --env-file .env --rm --user appuser $(IMAGE_NAME) pytest tests

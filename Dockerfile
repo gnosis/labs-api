@@ -21,8 +21,6 @@ RUN apt-get update && apt-get install -y postgresql
 
 RUN useradd -m appuser
 
-USER appuser
-
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
