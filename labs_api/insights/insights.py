@@ -26,8 +26,10 @@ from prediction_market_agent_tooling.tools.utils import (
     utcnow,
 )
 
-from labs_api.insights_cache import MarketInsightsResponseCache
-from labs_api.models import MarketInsightsResponse
+from labs_api.insights.insights_cache import (
+    MarketInsightsResponse,
+    MarketInsightsResponseCache,
+)
 
 
 # Don't observe the cached version, as it will always return the same thing that's already been observed.
