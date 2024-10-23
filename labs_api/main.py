@@ -9,8 +9,16 @@ from prediction_market_agent_tooling.gtypes import HexAddress
 from prediction_market_agent_tooling.loggers import logger
 
 from labs_api.config import Config
-from labs_api.insights import MarketInsightsResponse, market_insights_cached
-from labs_api.insights_cache import MarketInsightsResponseCache
+from labs_api.insights.insights import (
+    MarketInsightsResponse,
+    MarketInsightsResponseCache,
+    market_insights_cached,
+)
+from labs_api.invalid.invalid import (
+    MarketInvalidResponse,
+    MarketInvalidResponseCache,
+    market_invalid_cached,
+)
 
 HEX_ADDRESS_VALIDATOR = t.Annotated[
     HexAddress,
@@ -41,7 +49,8 @@ def create_app() -> fastapi.FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    market_insights_cache = MarketInsightsResponseCache()
+    market_insights_cache = MarketInsightsResponseCache(cache_expiry_days=3)
+    market_invalid_cache = MarketInvalidResponseCache(cache_expiry_days=None)
 
     @app.get("/ping/")
     def _ping() -> str:
@@ -55,6 +64,13 @@ def create_app() -> fastapi.FastAPI:
         insights = market_insights_cached(market_id, market_insights_cache)
         logger.info(f"Insights for `{market_id}`: {insights.model_dump()}")
         return insights
+
+    @app.get("/market-invalid/")
+    def _market_invalid(market_id: HEX_ADDRESS_VALIDATOR) -> MarketInvalidResponse:
+        """Returns whetever the market might be invalid."""
+        invalid = market_invalid_cached(market_id, market_invalid_cache)
+        logger.info(f"Invalid for `{market_id}`: {invalid.model_dump()}")
+        return invalid
 
     logger.info("API created.")
 
