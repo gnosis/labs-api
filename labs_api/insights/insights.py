@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import fastapi
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
@@ -9,44 +11,22 @@ from prediction_market_agent_tooling.markets.omen.omen_subgraph_handler import (
     OmenMarket,
     OmenSubgraphHandler,
 )
+from prediction_market_agent_tooling.tools.caches.db_cache import db_cache
 from prediction_market_agent_tooling.tools.langfuse_ import (
     get_langfuse_langchain_config,
     observe,
 )
-from prediction_market_agent_tooling.tools.tavily_storage.tavily_models import (
-    TavilyResponse,
-    TavilyStorage,
-)
-from prediction_market_agent_tooling.tools.tavily_storage.tavily_storage import (
-    TavilyStorage,
-    tavily_search,
-)
+from prediction_market_agent_tooling.tools.tavily.tavily_models import TavilyResponse
+from prediction_market_agent_tooling.tools.tavily.tavily_search import tavily_search
 from prediction_market_agent_tooling.tools.utils import (
     LLM_SUPER_LOW_TEMPERATURE,
     utcnow,
 )
 
-from labs_api.insights.insights_cache import (
-    MarketInsightsResponse,
-    MarketInsightsResponseCache,
-)
+from labs_api.insights.insights_models import MarketInsightsResponse
 
 
-# Don't observe the cached version, as it will always return the same thing that's already been observed.
-def market_insights_cached(
-    market_id: HexAddress, cache: MarketInsightsResponseCache
-) -> MarketInsightsResponse:
-    """Returns `market_insights`, but cached daily."""
-    if (cached := cache.find(market_id)) is not None:
-        return cached
-
-    else:
-        new = market_insights(market_id)
-        if new.has_insights:
-            cache.save(new)
-        return new
-
-
+@db_cache(max_age=timedelta(days=3))
 @observe()
 def market_insights(market_id: HexAddress) -> MarketInsightsResponse:
     """Returns market insights for a given market on Omen."""
@@ -56,17 +36,19 @@ def market_insights(market_id: HexAddress) -> MarketInsightsResponse:
         raise fastapi.HTTPException(
             status_code=404, detail=f"Market with id `{market_id}` not found."
         )
+    except Exception as e:
+        logger.error(f"Failed to fetch market for `{market_id}`: {e}")
+        raise fastapi.HTTPException(status_code=500)
     try:
         tavily_response = tavily_search(
             market.question_title,
             search_depth="basic",
             include_answer=True,
             max_results=5,
-            tavily_storage=TavilyStorage("market_insights"),
         )
     except Exception as e:
         logger.error(f"Failed to get tavily_response for market `{market_id}`: {e}")
-        tavily_response = None
+        raise fastapi.HTTPException(status_code=500)
     try:
         summary = (
             tavily_response_to_summary(market, tavily_response)
