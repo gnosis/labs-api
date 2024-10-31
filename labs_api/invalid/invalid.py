@@ -13,7 +13,7 @@ from prediction_market_agent_tooling.tools.utils import utcnow
 from labs_api.invalid.invalid_models import MarketInvalidResponse
 
 
-@db_cache(cache_none=False)
+@db_cache
 @observe()
 def market_invalid(market_id: HexAddress) -> MarketInvalidResponse:
     """Returns market invalid for a given market on Omen."""
