@@ -1,5 +1,4 @@
 import typing as t
-from contextlib import asynccontextmanager
 
 import fastapi
 import uvicorn
@@ -9,16 +8,8 @@ from prediction_market_agent_tooling.gtypes import HexAddress
 from prediction_market_agent_tooling.loggers import logger
 
 from labs_api.config import Config
-from labs_api.insights.insights import (
-    MarketInsightsResponse,
-    MarketInsightsResponseCache,
-    market_insights_cached,
-)
-from labs_api.invalid.invalid import (
-    MarketInvalidResponse,
-    MarketInvalidResponseCache,
-    market_invalid_cached,
-)
+from labs_api.insights.insights import MarketInsightsResponse, market_insights
+from labs_api.invalid.invalid import MarketInvalidResponse, market_invalid
 
 HEX_ADDRESS_VALIDATOR = t.Annotated[
     HexAddress,
@@ -31,17 +22,10 @@ HEX_ADDRESS_VALIDATOR = t.Annotated[
 
 
 def create_app() -> fastapi.FastAPI:
-    @asynccontextmanager
-    async def lifespan(app: fastapi.FastAPI) -> t.AsyncIterator[None]:
-        # At start of the service.
-        yield
-        # At end of the service.
-        market_insights_cache.engine.dispose()
-
     config = Config()
     initialize_langfuse(config.default_enable_langfuse)
 
-    app = fastapi.FastAPI(lifespan=lifespan)
+    app = fastapi.FastAPI()
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -49,8 +33,6 @@ def create_app() -> fastapi.FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    market_insights_cache = MarketInsightsResponseCache(cache_expiry_days=3)
-    market_invalid_cache = MarketInvalidResponseCache(cache_expiry_days=None)
 
     @app.get("/ping/")
     def _ping() -> str:
@@ -61,14 +43,14 @@ def create_app() -> fastapi.FastAPI:
     @app.get("/market-insights/")
     def _market_insights(market_id: HEX_ADDRESS_VALIDATOR) -> MarketInsightsResponse:
         """Returns market insights for a given market on Omen."""
-        insights = market_insights_cached(market_id, market_insights_cache)
+        insights = market_insights(market_id)
         logger.info(f"Insights for `{market_id}`: {insights.model_dump()}")
         return insights
 
     @app.get("/market-invalid/")
     def _market_invalid(market_id: HEX_ADDRESS_VALIDATOR) -> MarketInvalidResponse:
         """Returns whetever the market might be invalid."""
-        invalid = market_invalid_cached(market_id, market_invalid_cache)
+        invalid = market_invalid(market_id)
         logger.info(f"Invalid for `{market_id}`: {invalid.model_dump()}")
         return invalid
 
