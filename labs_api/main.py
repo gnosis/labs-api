@@ -1,7 +1,11 @@
+import time
 import typing as t
+import uuid
+from multiprocessing import Queue, Process
 
 import fastapi
 import uvicorn
+from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
 from prediction_market_agent_tooling.gtypes import HexAddress
@@ -20,10 +24,32 @@ HEX_ADDRESS_VALIDATOR = t.Annotated[
     ),
 ]
 
+def f(x):
+    print(f'called f with {x=}')
+    return x*x
+
+# Global dictionary to keep track of processes
+process_registry = {}
+
+def long_running_task(identifier: str, input_queue:Queue, output_queue: Queue):
+    """A dummy function that simulates a long-running task."""
+    print(f"Process {identifier} started")
+    while True:
+        # Check for messages in the queue
+        if not input_queue.empty():
+            number = input_queue.get()
+            result = number ** 2
+            print(f"Process {identifier} received {number}, squared it to {result}")
+            output_queue.put(result)
+        time.sleep(1)  # Prevent tight loop
+    print(f"Process {identifier} ended")  # Only runs if the loop is broken
 
 def create_app() -> fastapi.FastAPI:
     config = Config()
     initialize_langfuse(config.default_enable_langfuse)
+    
+    manager = Manager() # thread-safe shared state
+    shared_registry = manager.dict()
 
     app = fastapi.FastAPI()
     app.add_middleware(
@@ -33,6 +59,12 @@ def create_app() -> fastapi.FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @app.on_event("shutdown")
+    async def shutdown_event():
+        """Cleanup resources on shutdown."""
+        process_pool.close()
+        process_pool.join()
 
     @app.get("/ping/")
     def _ping() -> str:
@@ -54,6 +86,48 @@ def create_app() -> fastapi.FastAPI:
         logger.info(f"Invalid for `{market_id}`: {invalid.model_dump()}")
         return invalid
 
+    @app.post("/start_process")
+    async def start_process():
+        """Starts a new process and registers it."""
+        process_id = str(uuid.uuid4())  # Unique identifier for the process
+        input_queue = Queue()  # Create an input queue for communication
+        output_queue = Queue()  # Create an output queue for results
+        process = Process(target=long_running_task, args=(process_id, input_queue, output_queue), daemon=True)
+        process.start()
+
+        # Store the process and its queues in the registry
+        shared_registry[process_id] = {
+            "process": process,
+            "input_queue": input_queue,
+            "output_queue": output_queue
+        }
+        return {"message": "Process started", "process_id": process_id}
+
+    @app.post("/end_process/{process_id}")
+    async def end_process(process_id: str):
+        """Ends a specific process by its ID."""
+        entry = shared_registry.get(process_id)
+        if not entry:
+            raise HTTPException(status_code=404, detail="Process not found")
+
+        # Terminate the process and remove it from the registry
+        entry["process"].terminate()
+        entry["process"].join()
+        del shared_registry[process_id]
+        return {"message": f"Process {process_id} terminated"}
+
+    @app.post("/send_message_to_process/{process_id}")
+    async def send_message_to_process(process_id: str, number: int):
+        """Sends a number to a specific process to calculate its square."""
+        entry = process_registry.get(process_id)
+        if not entry:
+            raise HTTPException(status_code=404, detail="Process not found")
+
+        # Put the number in the process's queue
+        queue = entry["queue"]
+        queue.put(number)
+        return {"message": f"Sent number {number} to process {process_id}"}
+
     logger.info("API created.")
 
     return app
@@ -70,3 +144,4 @@ if __name__ == "__main__":
         reload=config.RELOAD,
         log_level="error",
     )
+
