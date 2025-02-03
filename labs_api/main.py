@@ -1,24 +1,12 @@
-import typing as t
-
 import fastapi
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from prediction_market_agent_tooling.deploy.agent import initialize_langfuse
-from prediction_market_agent_tooling.gtypes import HexAddress
 from prediction_market_agent_tooling.loggers import logger
 
 from labs_api.config import Config
-from labs_api.insights.insights import MarketInsightsResponse, market_insights
-from labs_api.invalid.invalid import MarketInvalidResponse, market_invalid
-
-HEX_ADDRESS_VALIDATOR = t.Annotated[
-    HexAddress,
-    fastapi.Query(
-        ...,
-        description="Hex address of the market on Omen.",
-        pattern="^0x[a-fA-F0-9]{40}$",
-    ),
-]
+from labs_api.insights.insights import QuestionInsightsResponse, question_insights
+from labs_api.invalid.invalid import QuestionInvalidResponse, question_invalid
 
 
 def create_app() -> fastapi.FastAPI:
@@ -40,18 +28,18 @@ def create_app() -> fastapi.FastAPI:
         logger.info("Pong!")
         return "pong"
 
-    @app.get("/market-insights/")
-    def _market_insights(market_id: HEX_ADDRESS_VALIDATOR) -> MarketInsightsResponse:
-        """Returns market insights for a given market on Omen."""
-        insights = market_insights(market_id)
-        logger.info(f"Insights for `{market_id}`: {insights.model_dump()}")
+    @app.get("/question-insights/")
+    def _question_insights(question: str) -> QuestionInsightsResponse:
+        """Returns insights for a given question."""
+        insights = question_insights(question)
+        logger.info(f"Insights for `{question}`: {insights.model_dump()}")
         return insights
 
-    @app.get("/market-invalid/")
-    def _market_invalid(market_id: HEX_ADDRESS_VALIDATOR) -> MarketInvalidResponse:
-        """Returns whetever the market might be invalid."""
-        invalid = market_invalid(market_id)
-        logger.info(f"Invalid for `{market_id}`: {invalid.model_dump()}")
+    @app.get("/question-invalid/")
+    def _question_invalid(question: str) -> QuestionInvalidResponse:
+        """Returns whatever the question might be invalid."""
+        invalid = question_invalid(question)
+        logger.info(f"Invalid for `{question}`: {invalid.model_dump()}")
         return invalid
 
     logger.info("API created.")
