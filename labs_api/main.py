@@ -46,7 +46,6 @@ def create_app() -> fastapi.FastAPI:
         insights = question_insights(question)
         logger.info(f"Insights for `{question}`: {insights.model_dump()}")
         return insights
-    
     @app.get("/market-invalid/")
     def _market_invalid(market_id: HEX_ADDRESS_VALIDATOR) -> MarketInvalidResponse:
         """Returns whetever the market might be invalid."""
