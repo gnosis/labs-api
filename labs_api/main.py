@@ -41,7 +41,7 @@ def create_app() -> fastapi.FastAPI:
         return "pong"
 
     @app.get("/question-insights/")
-    def _question_insights(question) -> QuestionInsightsResponse:
+    def _question_insights(question: str) -> QuestionInsightsResponse:
         """Returns insights for a given question."""
         insights = question_insights(question)
         logger.info(f"Insights for `{question}`: {insights.model_dump()}")
