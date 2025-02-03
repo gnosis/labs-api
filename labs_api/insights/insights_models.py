@@ -1,4 +1,3 @@
-from prediction_market_agent_tooling.gtypes import HexAddress
 from prediction_market_agent_tooling.tools.datetime_utc import DatetimeUTC
 from prediction_market_agent_tooling.tools.tavily.tavily_models import (
     TavilyResponse,

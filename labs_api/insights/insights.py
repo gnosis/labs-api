@@ -25,7 +25,7 @@ from labs_api.insights.insights_models import QuestionInsightsResponse
 @observe()
 def question_insights(question: str) -> QuestionInsightsResponse:
     """Returns insights for a given question."""
-    
+
     try:
         tavily_response = tavily_search(
             question,
@@ -56,9 +56,7 @@ def question_insights(question: str) -> QuestionInsightsResponse:
 
 
 @observe()
-def tavily_response_to_summary(
-    question: str, tavily_response: TavilyResponse
-) -> str:
+def tavily_response_to_summary(question: str, tavily_response: TavilyResponse) -> str:
     contents = [result.content for result in tavily_response.results]
 
     llm = ChatOpenAI(
@@ -81,9 +79,7 @@ Prediction Market question: {question}
 Information: {information}
 """
     )
-    messages = prompt.format_messages(
-        question=question, information=contents
-    )
+    messages = prompt.format_messages(question=question, information=contents)
     completion = str(
         llm.invoke(
             messages, max_tokens=1024, config=get_langfuse_langchain_config()
