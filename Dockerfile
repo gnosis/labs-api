@@ -28,7 +28,9 @@ WORKDIR /app
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY . .
+COPY pyproject.toml poetry.lock ./
+COPY labs_api labs_api
+COPY tests tests
 
 ENV PYTHONPATH=/app
 
