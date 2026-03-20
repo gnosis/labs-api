@@ -4032,13 +4032,13 @@ psutil = {version = ">=4.0.0", markers = "sys_platform != \"cygwin\""}
 
 [[package]]
 name = "mistralai"
-version = "2.1.0"
+version = "2.1.1"
 description = "Python Client SDK for the Mistral AI API."
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "mistralai-2.1.0-py3-none-any.whl", hash = "sha256:d7992bc04a9184e8e7477650912a00de43356e225bb19e29e92d4ffebdb1ec26"},
-    {file = "mistralai-2.1.0.tar.gz", hash = "sha256:651a31832bd915692ffe9709666c06b445b3f582cc1c99bcdbe5589baa99913e"},
+    {file = "mistralai-2.1.1-py3-none-any.whl", hash = "sha256:2b885e91d98d7e9c0963d21ac034b631d978ba1fc9e8e343026c5916fae5ab3a"},
+    {file = "mistralai-2.1.1.tar.gz", hash = "sha256:49a7bfce86251aea8396486a4f3300f85d803321a4e0edb5be235f0058258286"},
 ]
 
 [package.dependencies]
@@ -8880,4 +8880,4 @@ cffi = ["cffi (>=1.17,<2.0)", "cffi (>=2.0.0b)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.10.0"
-content-hash = "8aa4dfb1a8508d1a401f05c3185b574549622200a92175d26441bfc0f9646a8b"
+content-hash = "f1683df9ce464309c2e11a7e60e6aba625f58af49c84c11cc023cb65b387fbac"

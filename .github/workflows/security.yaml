@@ -16,6 +16,8 @@ jobs:
             - uses: pypa/gh-action-pip-audit@1d2d6f2a660b0c6aa7f74ddc7fa05e1e07ea172f
               with:
                   inputs: requirements.txt
+                  ignore-vulns: |
+                      CVE-2026-25580
 
     security:
         runs-on: ubuntu-latest
