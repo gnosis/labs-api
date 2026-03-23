@@ -10,7 +10,7 @@ jobs:
   mypy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
         with:
           submodules: true
       - uses: ./.github/actions/python_prepare
@@ -20,7 +20,7 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
         with:
           submodules: true
       - uses: ./.github/actions/python_prepare
@@ -30,11 +30,11 @@ jobs:
   pytest-docker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
       - name: Extract environment variables for Docker container
         # No variables required right now, add them here if needed.
         run: |
-          echo "" >> .env 
+          echo "" >> .env
       - name: Build Dockerimage
         run: make build
       - name: Run pytest in Docker
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
       - name: Build and push Docker image
         uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56
         with:
@@ -53,7 +53,7 @@ jobs:
   black:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
       - uses: ./.github/actions/python_prepare
       - name: Check with black
         run: poetry run black --check .
@@ -61,7 +61,7 @@ jobs:
   autoflake:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
       - uses: ./.github/actions/python_prepare
       - name: Check with autoflake
         run: |
@@ -71,7 +71,7 @@ jobs:
   isort:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
       - uses: ./.github/actions/python_prepare
       - name: Check with isort
         run: |
@@ -85,7 +85,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
       - name: Cleanup old GHCR images
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

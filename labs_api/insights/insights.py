@@ -60,9 +60,9 @@ def tavily_response_to_summary(question: str, tavily_response: TavilyResponse) -
     contents = [result.content for result in tavily_response.results]
 
     llm = ChatOpenAI(
-        model="gpt-4o-2024-08-06",
+        model_name="gpt-4o-2024-08-06",
         temperature=LLM_SUPER_LOW_TEMPERATURE,
-        api_key=APIKeys().openai_api_key_secretstr_v1,
+        openai_api_key=APIKeys().openai_api_key,
     )
 
     prompt = ChatPromptTemplate.from_template(
