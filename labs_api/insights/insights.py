@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 import fastapi
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from loguru import logger
 from prediction_market_agent_tooling.config import APIKeys
